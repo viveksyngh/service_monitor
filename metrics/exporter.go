@@ -1,6 +1,10 @@
 package metrics
 
-import "github.com/prometheus/client_golang/prometheus"
+import (
+	"sync"
+
+	"github.com/prometheus/client_golang/prometheus"
+)
 
 //Status status of URL
 type Status int
@@ -42,4 +46,14 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 
 	e.metricOptions.ExternalURLStatus.Collect(ch)
 	e.metricOptions.ExternalURLResponseTime.Collect(ch)
+}
+
+//For syncronisation to make sure MustRegister only called once
+var once = sync.Once{}
+
+//RegisterExporter registers with prometheus for tracking
+func RegisterExporter(e *Exporter) {
+	once.Do(func() {
+		prometheus.MustRegister(e)
+	})
 }
