@@ -60,6 +60,11 @@ func queryURL(client *http.Client, input <-chan string, result chan<- QueryResul
 		duration := time.Since(start)
 		if err != nil {
 			log.Println(err.Error())
+			result <- QueryResult{
+				URL:          url,
+				Status:       DOWN,
+				ResponseTime: duration,
+			}
 			continue
 		}
 
@@ -81,7 +86,7 @@ func queryURL(client *http.Client, input <-chan string, result chan<- QueryResul
 //NewClient returns a new http client
 func NewClient() *http.Client {
 
-	timeout := 10 * time.Second
+	timeout := 5 * time.Second
 	client := &http.Client{
 		Transport: &http.Transport{
 			Proxy: http.ProxyFromEnvironment,
