@@ -9,14 +9,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-//Status status of URL
-type Status int
-
-const (
-	UP   Status = 1
-	DOWN Status = 0
-)
-
 //Exporter a prometheus exporter
 type Exporter struct {
 	metricOptions MetricOptions
@@ -64,8 +56,8 @@ func RegisterExporter(e *Exporter) {
 }
 
 //StartURLWatcher start worker to watch URLS
-func (e *Exporter) StartURLWatcher(urls []string) {
-	ticker := time.NewTicker(time.Second * 30)
+func (e *Exporter) StartURLWatcher(urls []string, interval time.Duration) {
+	ticker := time.NewTicker(interval)
 	quit := make(chan struct{})
 
 	go func() {
@@ -74,6 +66,7 @@ func (e *Exporter) StartURLWatcher(urls []string) {
 			case <-ticker.C:
 				queryResults := client.QueryURLs(urls)
 				e.QueryResults = queryResults
+				break
 			case <-quit:
 				return
 			}

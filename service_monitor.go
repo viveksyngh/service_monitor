@@ -27,11 +27,13 @@ func makeQueryHandler(e *metrics.Exporter) func(w http.ResponseWriter, r *http.R
 
 func main() {
 
+	queryInterval := 30 * time.Second
+
 	//Setup metric options and exporter
 	metricOptions := metrics.NewMetricOptions()
 	exporter := metrics.NewExporter(metricOptions)
 	metrics.RegisterExporter(exporter)
-	exporter.StartURLWatcher(URLs)
+	exporter.StartURLWatcher(URLs, queryInterval)
 
 	//Create Router
 	router := mux.NewRouter()

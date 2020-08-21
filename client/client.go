@@ -7,11 +7,19 @@ import (
 	"time"
 )
 
+//Status status of URL
+type Status int
+
+const (
+	UP   Status = 1
+	DOWN Status = 0
+)
+
 //QueryResult result of the URL query
 type QueryResult struct {
-	URL          string
-	Status       int
-	ResponseTime time.Duration
+	URL          string        `json:"url"`
+	Status       Status        `json:"status"`
+	ResponseTime time.Duration `json:"response_time"`
 }
 
 //QueryURLs query urls and return result
@@ -20,7 +28,6 @@ func QueryURLs(urls []string) []QueryResult {
 	queryResults := make(chan QueryResult)
 	urlsChan := make(chan string)
 
-	// var wg sync.WaitGroup
 	var results []QueryResult
 
 	for i := 0; i < 2; i++ {
@@ -32,8 +39,6 @@ func QueryURLs(urls []string) []QueryResult {
 	}
 
 	close(urlsChan)
-
-	// wg.Wait()
 
 	for i := 0; i < len(urls); i++ {
 		results = append(results, <-queryResults)
@@ -58,11 +63,11 @@ func queryURL(client *http.Client, input <-chan string, result chan<- QueryResul
 			continue
 		}
 
-		var status int
+		var status Status
 		if res.StatusCode == http.StatusOK {
-			status = 1
+			status = UP
 		} else {
-			status = 0
+			status = DOWN
 		}
 
 		result <- QueryResult{

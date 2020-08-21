@@ -29,7 +29,7 @@ func NewMetricOptions() MetricOptions {
 		prometheus.HistogramOpts{
 			Namespace: "sample",
 			Subsystem: "external",
-			Name:      "url_response",
+			Name:      "url_response_time",
 			Help:      "URL response time",
 		},
 		[]string{"url"},
