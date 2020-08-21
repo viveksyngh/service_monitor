@@ -8,13 +8,21 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/viveksyngh/service_monitor/client"
 	"github.com/viveksyngh/service_monitor/metrics"
 )
 
-func queryHandler(w http.ResponseWriter, r *http.Request) {
-	results := QueryURLs(URLs)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(results)
+//URLs list of URLs to query
+var URLs []string = []string{"https://httpstat.us/503", "https://httpstat.us/200"}
+
+func makeQueryHandler(e *metrics.Exporter) func(w http.ResponseWriter, r *http.Request) {
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		results := client.QueryURLs(URLs)
+		e.QueryResults = results
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(results)
+	}
 }
 
 func main() {
@@ -23,6 +31,7 @@ func main() {
 	metricOptions := metrics.NewMetricOptions()
 	exporter := metrics.NewExporter(metricOptions)
 	metrics.RegisterExporter(exporter)
+	exporter.StartURLWatcher(URLs)
 
 	//Create Router
 	router := mux.NewRouter()
@@ -32,7 +41,7 @@ func main() {
 
 	//Register handlers
 	router.Handle("/metrics", metrics.PrometheusHandler())
-	router.HandleFunc("/", queryHandler)
+	router.HandleFunc("/", makeQueryHandler(exporter))
 
 	//Configure the HTTP server and start it
 	s := &http.Server{

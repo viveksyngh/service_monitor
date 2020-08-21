@@ -2,6 +2,9 @@ package metrics
 
 import (
 	"sync"
+	"time"
+
+	"github.com/viveksyngh/service_monitor/client"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -14,17 +17,10 @@ const (
 	DOWN Status = 0
 )
 
-//URL external URL for query
-type URL struct {
-	Endpoint     string
-	Status       Status
-	ResponseTime int
-}
-
 //Exporter a prometheus exporter
 type Exporter struct {
 	metricOptions MetricOptions
-	urls          []URL
+	QueryResults  []client.QueryResult
 }
 
 //NewExporter creates a new exporter
@@ -44,6 +40,15 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 //Collect collects data to be consumed by prometheus
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 
+	for _, queryResult := range e.QueryResults {
+		e.metricOptions.ExternalURLStatus.
+			WithLabelValues(queryResult.URL).
+			Set(float64(queryResult.Status))
+
+		e.metricOptions.ExternalURLResponseTime.
+			WithLabelValues(queryResult.URL).
+			Observe(queryResult.ResponseTime.Seconds())
+	}
 	e.metricOptions.ExternalURLStatus.Collect(ch)
 	e.metricOptions.ExternalURLResponseTime.Collect(ch)
 }
@@ -56,4 +61,22 @@ func RegisterExporter(e *Exporter) {
 	once.Do(func() {
 		prometheus.MustRegister(e)
 	})
+}
+
+//StartURLWatcher start worker to watch URLS
+func (e *Exporter) StartURLWatcher(urls []string) {
+	ticker := time.NewTicker(time.Second * 30)
+	quit := make(chan struct{})
+
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				queryResults := client.QueryURLs(urls)
+				e.QueryResults = queryResults
+			case <-quit:
+				return
+			}
+		}
+	}()
 }
