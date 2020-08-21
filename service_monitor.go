@@ -15,6 +15,20 @@ import (
 //URLs list of URLs to query
 var URLs []string = []string{"https://httpstat.us/503", "https://httpstat.us/200"}
 
+//healthzHandler healthz hanlder
+func healthzHandler(w http.ResponseWriter, r *http.Request) {
+
+	switch r.Method {
+	case http.MethodGet:
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+		break
+
+	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
+	}
+}
+
 func makeQueryHandler(e *metrics.Exporter) func(w http.ResponseWriter, r *http.Request) {
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -37,13 +51,14 @@ func main() {
 
 	//Create Router
 	router := mux.NewRouter()
-	port := 8082
+	port := 8080
 	readTimeout := 5 * time.Second
 	writeTimeout := 5 * time.Second
 
 	//Register handlers
 	router.Handle("/metrics", metrics.PrometheusHandler())
 	router.HandleFunc("/", makeQueryHandler(exporter))
+	router.HandleFunc("/healthz", healthzHandler)
 
 	//Configure the HTTP server and start it
 	s := &http.Server{

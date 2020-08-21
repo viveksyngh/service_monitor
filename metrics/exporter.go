@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"log"
 	"sync"
 	"time"
 
@@ -64,6 +65,7 @@ func (e *Exporter) StartURLWatcher(urls []string, interval time.Duration) {
 		for {
 			select {
 			case <-ticker.C:
+				log.Printf("Querying URLs: %v\n", urls)
 				queryResults := client.QueryURLs(urls)
 				e.QueryResults = queryResults
 				break
