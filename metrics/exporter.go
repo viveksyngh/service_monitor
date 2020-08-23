@@ -40,7 +40,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 
 		e.metricOptions.ExternalURLResponseTime.
 			WithLabelValues(queryResult.URL).
-			Observe(queryResult.ResponseTime.Seconds())
+			Observe(float64(queryResult.ResponseTime.Milliseconds()))
 	}
 	e.metricOptions.ExternalURLStatus.Collect(ch)
 	e.metricOptions.ExternalURLResponseTime.Collect(ch)

@@ -55,8 +55,6 @@ func queryURL(client *http.Client, input <-chan string, result chan<- QueryResul
 
 		res, err := client.Do(req)
 
-		_ = res.Body.Close()
-
 		duration := time.Since(start)
 		if err != nil {
 			log.Println(err.Error())
@@ -67,6 +65,8 @@ func queryURL(client *http.Client, input <-chan string, result chan<- QueryResul
 			}
 			continue
 		}
+
+		_ = res.Body.Close()
 
 		var status Status
 		if res.StatusCode == http.StatusOK {
