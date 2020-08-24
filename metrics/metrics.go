@@ -29,8 +29,8 @@ func NewMetricOptions() MetricOptions {
 		prometheus.HistogramOpts{
 			Namespace: "sample",
 			Subsystem: "external",
-			Name:      "url_response_time",
-			Help:      "URL response time",
+			Name:      "url_response_time_ms",
+			Help:      "URL response time in milli seconds",
 		},
 		[]string{"url"},
 	)
