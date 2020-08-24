@@ -23,14 +23,14 @@ type QueryResult struct {
 }
 
 //QueryURLs query urls and return result
-func QueryURLs(urls []string) []QueryResult {
+func QueryURLs(urls []string, workerCount int) []QueryResult {
 	client := NewClient()
 	queryResults := make(chan QueryResult)
 	urlsChan := make(chan string)
 
 	var results []QueryResult
 
-	for i := 0; i < 2; i++ {
+	for i := 0; i < workerCount; i++ {
 		go queryURL(client, urlsChan, queryResults)
 	}
 

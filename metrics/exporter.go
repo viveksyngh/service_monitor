@@ -57,7 +57,7 @@ func RegisterExporter(e *Exporter) {
 }
 
 //StartURLWatcher start worker to watch URLS
-func (e *Exporter) StartURLWatcher(urls []string, interval time.Duration) {
+func (e *Exporter) StartURLWatcher(urls []string, interval time.Duration, workerCount int) {
 	ticker := time.NewTicker(interval)
 	quit := make(chan struct{})
 
@@ -66,7 +66,7 @@ func (e *Exporter) StartURLWatcher(urls []string, interval time.Duration) {
 			select {
 			case <-ticker.C:
 				log.Printf("Querying URLs: %v\n", urls)
-				queryResults := client.QueryURLs(urls)
+				queryResults := client.QueryURLs(urls, workerCount)
 				e.QueryResults = queryResults
 				break
 			case <-quit:
