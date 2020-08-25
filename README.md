@@ -5,6 +5,21 @@ Service monitor is a solution in golang designed to run on a Kubernetes Cluster 
 1. Internet URLs not reachable or taking longer that 5 seconds to respond are down.
 2. Numbers of URLs to monitor are relatively small and can be passed as configuration to the application.
 
+## Application Screenshot
+
+### Grafana Dashboard
+
+![Grafana Dashboard](img/grafana-1.png)
+
+### Prometheus Metrics
+
+![Prometheus](img/prom-4.png)
+
+![Prometheus](img/prom-3.png)
+
+![Prometheus](img/prom-2.png)
+
+![Prometheus](img/prom-1.png)
 
 ## Deployment and Testing
 
@@ -58,9 +73,13 @@ kubectl port-forward -n app svc/prometheus 3000:3000 &
          Password : admin
          ```
   3. Go to Create -> Import 
+
+  ![Create Dashboard](img/grafana-3.png)
   
   4. Go to Import via panel json section 
   
+  ![Create Dashboard](img/grafana-2.png)
+
   5. Copy the JSON data from `dasboard.json` file in service_monitor folder
   
   6. Paste it to Import via panel json section and click on import 
