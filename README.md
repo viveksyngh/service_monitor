@@ -13,12 +13,16 @@ Service monitor is a solution in golang designed to run on a Kubernetes Cluster 
 
 ### Prometheus Metrics
 
+##### Screenshot 1
 ![Prometheus](img/prom-4.png)
 
+##### Screenshot 2
 ![Prometheus](img/prom-3.png)
 
+##### Screenshot 3
 ![Prometheus](img/prom-2.png)
 
+##### Screenshot 4
 ![Prometheus](img/prom-1.png)
 
 ## Deployment and Testing

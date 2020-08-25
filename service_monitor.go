@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -13,8 +16,9 @@ import (
 )
 
 //URLs list of URLs to query
-var URLs []string = []string{"https://httpstat.us/503", "https://httpstat.us/200"}
 
+var URLs []string
+var defaultURLs []string = []string{"https://httpstat.us/503", "https://httpstat.us/200"}
 var defaultWorkerCount = 2
 
 //healthzHandler healthz hanlder
@@ -41,9 +45,36 @@ func makeQueryHandler(e *metrics.Exporter) func(w http.ResponseWriter, r *http.R
 	}
 }
 
+func parseURLs(urls string) []string {
+	var urlList []string
+
+	splitURLs := strings.Split(urls, ",") // Split URLs my comma
+
+	//Parse and check for valid URLs
+	for _, u := range splitURLs {
+		u, err := url.ParseRequestURI(u)
+		if err != nil {
+			continue
+		}
+		urlList = append(urlList, u.String())
+	}
+	return urlList
+}
+
 func main() {
 
 	queryInterval := 15 * time.Second
+
+	//Read URLs to monitor from environment variable
+	var urls = os.Getenv("urls")
+
+	if len(urls) == 0 {
+		URLs = defaultURLs // Use default if nothing configured
+	} else {
+		URLs = parseURLs(urls)
+	}
+
+	fmt.Printf("URLs to monitor: %v\n", URLs)
 
 	//Setup metric options and exporter
 	metricOptions := metrics.NewMetricOptions()
