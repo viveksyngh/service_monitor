@@ -2,6 +2,7 @@ package metrics
 
 import (
 	"log"
+	"net/http"
 	"sync"
 	"time"
 
@@ -57,7 +58,7 @@ func RegisterExporter(e *Exporter) {
 }
 
 //StartURLWatcher start worker to watch URLS
-func (e *Exporter) StartURLWatcher(urls []string, interval time.Duration, workerCount int) {
+func (e *Exporter) StartURLWatcher(httpClient *http.Client, urls []string, interval time.Duration, workerCount int) {
 	ticker := time.NewTicker(interval)
 	quit := make(chan struct{})
 
@@ -66,7 +67,7 @@ func (e *Exporter) StartURLWatcher(urls []string, interval time.Duration, worker
 			select {
 			case <-ticker.C:
 				log.Printf("Querying URLs: %v\n", urls)
-				queryResults := client.QueryURLs(urls, workerCount)
+				queryResults := client.QueryURLs(httpClient, urls, workerCount)
 				e.QueryResults = queryResults
 				break
 			case <-quit:

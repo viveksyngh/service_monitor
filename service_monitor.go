@@ -35,10 +35,10 @@ func healthzHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func makeQueryHandler(e *metrics.Exporter) func(w http.ResponseWriter, r *http.Request) {
+func makeQueryHandler(httpClient *http.Client, e *metrics.Exporter) func(w http.ResponseWriter, r *http.Request) {
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		results := client.QueryURLs(URLs, defaultWorkerCount)
+		results := client.QueryURLs(httpClient, URLs, defaultWorkerCount)
 		e.QueryResults = results
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(results)
@@ -74,13 +74,15 @@ func main() {
 		URLs = parseURLs(urls)
 	}
 
+	httpClient := client.NewClient()
+
 	fmt.Printf("URLs to monitor: %v\n", URLs)
 
 	//Setup metric options and exporter
 	metricOptions := metrics.NewMetricOptions()
 	exporter := metrics.NewExporter(metricOptions)
 	metrics.RegisterExporter(exporter)
-	exporter.StartURLWatcher(URLs, queryInterval, defaultWorkerCount)
+	exporter.StartURLWatcher(httpClient, URLs, queryInterval, defaultWorkerCount)
 
 	//Create Router
 	router := mux.NewRouter()
@@ -90,7 +92,7 @@ func main() {
 
 	//Register handlers
 	router.Handle("/metrics", metrics.PrometheusHandler())
-	router.HandleFunc("/", makeQueryHandler(exporter))
+	router.HandleFunc("/", makeQueryHandler(httpClient, exporter))
 	router.HandleFunc("/healthz", healthzHandler)
 
 	//Configure the HTTP server and start it

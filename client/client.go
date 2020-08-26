@@ -23,8 +23,8 @@ type QueryResult struct {
 }
 
 //QueryURLs query urls and return result
-func QueryURLs(urls []string, workerCount int) []QueryResult {
-	client := NewClient()
+func QueryURLs(client *http.Client, urls []string, workerCount int) []QueryResult {
+
 	queryResults := make(chan QueryResult)
 	urlsChan := make(chan string)
 
