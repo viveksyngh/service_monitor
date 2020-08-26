@@ -9,6 +9,8 @@ COPY . .
 # Run a gofmt and exclude all vendored code.
 RUN test -z "$(gofmt -l $(find . -type f -name '*.go' -not -path "./vendor/*"))" || { echo "Run \"gofmt -s -w\" on your Golang code"; exit 1; }
 
+RUN go test $(go list ./... | grep -v /vendor/ | grep -v /template/|grep -v /build/|grep -v /sample/) -cover
+
 # ldflags "-s -w" strips binary
 RUN CGO_ENABLED=0 GOOS=linux go build \
     -installsuffix cgo -o service_monitor
