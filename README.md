@@ -52,7 +52,7 @@ git clone https://www.github.com/viveksyngh/service_monitor.git && cd service_mo
 
 ### Create the kubernetes namespace required for the application 
 ```
-kubectl apply -f namespaces.yaml
+kubectl apply -f namespace.yml
 ```
 
 ### Apply the artifacts required to run the application 
@@ -66,7 +66,7 @@ kubectl port-forward -n app svc/grafana 3000:3000 &
 ```
 
 ```
-kubectl port-forward -n app svc/prometheus 3000:3000 &
+kubectl port-forward -n app svc/prometheus 9090:9090 &
 ```
 
 ### Create the grafana dashboard
@@ -88,3 +88,24 @@ kubectl port-forward -n app svc/prometheus 3000:3000 &
   
   6. Paste it to Import via panel json section and click on import 
 
+
+### Prometheus metrics 
+
+To view prometheus metrics, please open URL `http://localhost:9090` in your browser
+
+
+### To build and push you own docker image for service monitor 
+
+  1. Go to `service_monitor` root directory 
+  2. Export two variable `NAMESPACE` and `TAG`
+     ```
+     export NAMESPACE=<you docker registry username>
+     export TAG=<TAG for the Image>
+     ```
+  3. Run below command to build and push 
+     ```
+     make build && make push
+     ```
+  Note. Please make sure you are logged in your registry and credentails are saved in docker deamon.
+  
+  4. Now you can update the `service_monitor` deployment yml to use your docker image and deploy it kubenetes cluster. 
